@@ -114,42 +114,42 @@ async function resolveTeacherInfoArr() {
 
 
             const pool  = new AsyncPool([], 0.1)
+            const tasks = []
 
             rl.on('line', async (line) => {
                 const department = JSON.parse(line.replace(/\d+:\s*/, ''))
                 const key = department.suffix
-                let task = new Promise( async (resolve, reject) => {
-                    const teacherSuffixArr =  await getTeachers(department.suffix)
+                let task = new Promise(async (resolve, reject) => {
+                    const teacherSuffixArr = await getTeachers(department.suffix)
                     console.log('拉取学院老师共', teacherSuffixArr.length, '名')
-                        
-                    let str = ""
-                    str= teacherSuffixArr.map(item=>JSON.stringify(item)) + '\n'
-                    writeStream.write(str)
+                    if(teacherSuffixArr.length > 0) {
+                        let str = ""
+                        str= teacherSuffixArr.map(item=>JSON.stringify(item)) + '\n'
+                    }
+                    // writeStream.write(str)
     
-                    teacherSuffixArr.forEach(item=> {
-                        let task2 = new Promise(async (_resolve) => {
-                            const teacherInfo = await resolveTeacherInfo(item);
-                            writeStream2.write(JSON.stringify(teacherInfo) + '\n');
-                            _resolve('1')
-                        })
+                    // teacherSuffixArr.forEach(item=> {
+                    //     let task2 = new Promise(async (_resolve) => {
+                    //         const teacherInfo = await resolveTeacherInfo(item);
+                    //         writeStream2.write(JSON.stringify(teacherInfo) + '\n');
+                    //         _resolve('1')
+                    //     })
 
-                        pool.push_front(task2)
+                    //     pool.push_front(task2)
 
-                        str += JSON.stringify(item) + '\n'            
-                    })
+                    //     str += JSON.stringify(item) + '\n'            
+                    // })
                     resolve('ok')
                 })
                 
-
-                if(pool.m_taskNum < 3) {
-                    pool.push(task)
-                }
+                tasks.push(task)
 
             })
 
 
             rl.on('close', async () => {
-                const results = (await pool.getResults()).flat(); 
+                console.log(await tasks[0], tasks.length)
+                // const results = (await pool.getResults()).flat(); 
                 resolve(results)
             })
 
@@ -162,21 +162,26 @@ async function resolveTeacherInfoArr() {
 }
 
 async function getTeachers(departmentSuffix) {
-    const prefix = 'https://www.x-mol.com'
+    try {
+        const prefix = 'https://www.x-mol.com'
 
-    let url = prefix + departmentSuffix
-
-    const htmlData = await axios.get(url)
-                                .then(res=> res.data)
-
-    const $ = cheerio.load(htmlData);
-    const teacherArray = []
-    $('.first-detail-name > ul > li > a').each(
-        (i,element) => {
-            teacherArray.push(element.attribs.href)
-        }
-    )
-    return teacherArray
+        let url = prefix + departmentSuffix
+    
+        const htmlData = await axios.get(url)
+                                    .then(res=> res.data)
+    
+        const $ = cheerio.load(htmlData);
+        const teacherArray = []
+        $('.first-detail-name > ul > li > a').each(
+            (i,element) => {
+                teacherArray.push(element.attribs.href)
+            }
+        )
+        return teacherArray
+    } catch ( err) {
+        console.error(err.message)
+        return []
+    }
 }
 
 

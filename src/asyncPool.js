@@ -92,9 +92,10 @@ class AsyncPool {
         }
       });
     }
+    const num = this.m_activeTasks.length
     await Promise.all(this.m_activeTasks);
     const batchUsedTime = Date.now() - start;
-    const waitTime = Math.max(this.m_interval * this.m_frequency - batchUsedTime, 0); // 确保waitTime不为负值
+    const waitTime = Math.max(this.m_interval * num - batchUsedTime, 0); // 确保waitTime不为负值
     await new Promise(resolve => setTimeout( resolve , waitTime));  // 等待调度完成
   }
   

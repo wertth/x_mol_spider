@@ -14,7 +14,7 @@ describe('AsyncPool', function() {
       new Promise(resolve => setTimeout(() => resolve('task6 done'), 100)),
       new Promise(resolve => setTimeout(() => resolve('task7 done'), 100))
     ];
-    const asyncPool = new AsyncPool(tasks, 3);
+    const asyncPool = new AsyncPool(tasks, 0.1);
 
     await asyncPool.run();
 
@@ -30,7 +30,7 @@ describe('AsyncPool', function() {
       'task6 done',
       'task7 done'
     ]);
-    expect(totalElapsed).to.be.above(Math.floor(tasks.length / 3) * 1000);
+    expect(totalElapsed).to.be.above(Math.floor(tasks.length /0.1) * 1000);
   });
 
   it('should push tasks to the front of the queue', async function() {
