@@ -119,7 +119,7 @@ async function resolveTeacherInfoArr() {
             rl.on('line', async (line) => {
                 const department = JSON.parse(line.replace(/\d+:\s*/, ''))
                 const key = department.suffix
-                let task = async (resolve, reject) => {
+                let task = async () => {
                     try {
                       const teacherSuffixArr = await getTeachers(department.suffix);
                       console.log('拉取学院老师共', teacherSuffixArr.length, '名')
@@ -129,20 +129,27 @@ async function resolveTeacherInfoArr() {
                         writeStream.write(str);
                       }
           
-                      // 如果需要进一步处理教师信息，可以取消注释以下代码
-                      /*
-                      teacherSuffixArr.forEach(item => {
-                        let task2 = new Promise(async (resolve) => {
-                          const teacherInfo = await resolveTeacherInfo(item);
-                          writeStream2.write(JSON.stringify(teacherInfo) + '\n');
-                          resolve('1');
+                      // 进一步处理教师信息，可以取消注释以下代码
+                        const subTasks = []
+                        teacherSuffixArr.forEach(item => {
+                            let task2 = async () => {
+                                try {
+                                    const teacherInfo = await resolveTeacherInfo(item);
+                                    const str = JSON.stringify(teacherInfo) + '\n'
+                                    writeStream2.write(str);
+                                    return str
+                                } catch(err) {
+                                    console.error(err)
+                                }
+                                
+                            }
+                            subTasks.push(task2)
                         });
-                        pool.push_front(task2);
-                      });
-                      */
-                      resolve('ok');
+                        pool.push_front(...subTasks)
+                      
+                        return 'ok'
                     } catch (error) {
-                      reject(error.message);
+                        return 'err'
                     }
                   };
                 
@@ -152,7 +159,7 @@ async function resolveTeacherInfoArr() {
 
 
             rl.on('close', async () => {
-                pool.push(...(tasks.splice(0, 2).map(task => task())));
+                pool.push(...tasks);
                 // (await pool.getResults()).flat()
             })
 

@@ -106,7 +106,7 @@ class AsyncPool {
   packTask(task, index) {
     return new Promise(async (resolve, reject) => {
       try {
-        const res = await task;
+        const res = await task();
         console.log(`Task ${index} completed, result: ${res}`);
         this.m_results[index] = Array.isArray(res) ? res : [res];
         resolve(res);
