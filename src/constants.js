@@ -3,10 +3,16 @@ const DOUBLE_FIRST_CLASS_UNIVERSITY_LIST = [
   ];
 
 const SOURCE_URL='https://www.x-mol.com/university/china';
+
+
+const DEPARTMENT_FILE_PATH = './save/.departments'
+const TEACHER_QUERY_SUFFIX_FILE_PATH = './save/.teachers'
   
 
   export {
     DOUBLE_FIRST_CLASS_UNIVERSITY_LIST,
-    SOURCE_URL
+    SOURCE_URL,
+    DEPARTMENT_FILE_PATH,
+    TEACHER_QUERY_SUFFIX_FILE_PATH
   };
   
