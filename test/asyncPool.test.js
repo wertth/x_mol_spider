@@ -1,9 +1,8 @@
 import { expect } from 'chai';
-import { AsyncPool } from '../src/asyncPool.js';
-
+import { AsyncPool } from '../src/asyncPool.js';  // 替换为实际路径
 
 describe('AsyncPool', function() {
-  this.timeout(800000)
+  this.timeout(80000)
   it('should execute tasks at the specified frequency', async function() {
     const tasks = [
       new Promise(resolve => setTimeout(() => resolve('task1 done'), 100)),
@@ -30,7 +29,7 @@ describe('AsyncPool', function() {
       'task6 done',
       'task7 done'
     ]);
-    expect(totalElapsed).to.be.above(Math.floor(tasks.length /0.1) * 1000);
+    expect(totalElapsed).to.be.above(Math.floor(tasks.length / 0.1) * 1000);
   });
 
   it('should push tasks to the front of the queue', async function() {
@@ -40,7 +39,7 @@ describe('AsyncPool', function() {
       new Promise(resolve => setTimeout(() => resolve('task3 done'), 100))
     ];
     const asyncPool = new AsyncPool(tasks, 3);
-    
+
     asyncPool.push_front(new Promise(resolve => setTimeout(() => resolve('task0 done'), 100)));
 
     await asyncPool.run();
@@ -117,7 +116,7 @@ describe('AsyncPool', function() {
     const asyncPool = new AsyncPool(tasks, 2);
 
     asyncPool.clear();
-    
+
     await asyncPool.run();
 
     const results = (await asyncPool.getResults()).flat();
@@ -136,7 +135,7 @@ describe('AsyncPool', function() {
     await asyncPool.run();
 
     const results = (await asyncPool.getResults()).flat();
-    
+
     expect(results).to.include.members(['task2 done']);
     expect(results).to.include.members(['task1 failed']);
   });
@@ -159,6 +158,7 @@ describe('AsyncPool', function() {
     expect(results.flat()).to.have.members(['task1 done', 'task2 done']);
     expect(totalElapsed).to.be.above(200);
   });
+
   it('should flatten results with tasks inserted at both ends during run', async function() {
     const tasks = [
       new Promise(resolve => setTimeout(() => resolve(['task1 done']), 100)),

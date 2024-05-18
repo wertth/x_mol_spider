@@ -119,28 +119,32 @@ async function resolveTeacherInfoArr() {
             rl.on('line', async (line) => {
                 const department = JSON.parse(line.replace(/\d+:\s*/, ''))
                 const key = department.suffix
-                let task = new Promise(async (resolve, reject) => {
-                    const teacherSuffixArr = await getTeachers(department.suffix)
-                    console.log('拉取学院老师共', teacherSuffixArr.length, '名')
-                    if(teacherSuffixArr.length > 0) {
-                        let str = ""
-                        str= teacherSuffixArr.map(item=>JSON.stringify(item)) + '\n'
+                let task = async (resolve, reject) => {
+                    try {
+                      const teacherSuffixArr = await getTeachers(department.suffix);
+                      console.log('拉取学院老师共', teacherSuffixArr.length, '名')
+                      
+                      if (teacherSuffixArr.length > 0) {
+                        let str = teacherSuffixArr.map(item => JSON.stringify(item)).join('\n') + '\n';
+                        writeStream.write(str);
+                      }
+          
+                      // 如果需要进一步处理教师信息，可以取消注释以下代码
+                      /*
+                      teacherSuffixArr.forEach(item => {
+                        let task2 = new Promise(async (resolve) => {
+                          const teacherInfo = await resolveTeacherInfo(item);
+                          writeStream2.write(JSON.stringify(teacherInfo) + '\n');
+                          resolve('1');
+                        });
+                        pool.push_front(task2);
+                      });
+                      */
+                      resolve('ok');
+                    } catch (error) {
+                      reject(error.message);
                     }
-                    // writeStream.write(str)
-    
-                    // teacherSuffixArr.forEach(item=> {
-                    //     let task2 = new Promise(async (_resolve) => {
-                    //         const teacherInfo = await resolveTeacherInfo(item);
-                    //         writeStream2.write(JSON.stringify(teacherInfo) + '\n');
-                    //         _resolve('1')
-                    //     })
-
-                    //     pool.push_front(task2)
-
-                    //     str += JSON.stringify(item) + '\n'            
-                    // })
-                    resolve('ok')
-                })
+                  };
                 
                 tasks.push(task)
 
@@ -148,9 +152,8 @@ async function resolveTeacherInfoArr() {
 
 
             rl.on('close', async () => {
-                console.log(await tasks[0], tasks.length)
-                // const results = (await pool.getResults()).flat(); 
-                resolve(results)
+                pool.push(...(tasks.splice(0, 2).map(task => task())));
+                // (await pool.getResults()).flat()
             })
 
         } catch(err) {

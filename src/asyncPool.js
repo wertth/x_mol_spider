@@ -37,18 +37,22 @@ class AsyncPool {
     return this.m_results;
   }
 
-  push(task) {
-    const index = this.m_taskNum++;
-    this.m_tasks.push({ task, index });
+  push(...tasks) {
+    tasks.forEach(task => {
+      const index = this.m_taskNum++;
+      this.m_tasks.push({ task, index });
+    });
     this.m_results.length = this.m_taskNum;
     if (!this.m_running) {
       this.run();
     }
   }
 
-  push_front(task) {
-    const index = this.m_taskNum++;
-    this.m_tasks.unshift({ task, index });
+  push_front(...tasks) {
+    tasks.reverse().forEach(task => {
+      const index = this.m_taskNum++;
+      this.m_tasks.unshift({ task, index });
+    });
     this.m_results.length = this.m_taskNum;
     if (!this.m_running) {
       this.run();
