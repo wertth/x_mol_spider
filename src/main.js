@@ -77,11 +77,7 @@ const seizeAllDepartments = async () => {
 
     let pool = new AsyncPool(promiseArr,0.1)
 
-    const departmentsInfoArr = await pool.run();
-    // for(const departments of results) {
-    //     departmentsInfoArr.push(...departments)
-    // }
-    
+    const departmentsInfoArr = await pool.run();   
     const str = departmentsInfoArr
                 .map((depart,index)=> `${index}: ${JSON.stringify(depart)}`)
                 .join('\n')
@@ -122,6 +118,8 @@ async function resolveTeacherInfoArr() {
                 let task = async () => {
                     try {
                       const teacherSuffixArr = await getTeachers(department.suffix);
+                      //  /university/detail/903/department/3422
+                      const universityId = department.suffix.split('/')[3]
                       console.log('拉取学院老师共', teacherSuffixArr.length, '名')
                       
                       if (teacherSuffixArr.length > 0) {
@@ -134,12 +132,13 @@ async function resolveTeacherInfoArr() {
                         teacherSuffixArr.forEach(item => {
                             let task2 = async () => {
                                 try {
-                                    const teacherInfo = await resolveTeacherInfo(item);
+                                    const teacherInfo = await resolveTeacherInfo(item, universityId);
                                     const str = JSON.stringify(teacherInfo) + '\n'
                                     writeStream2.write(str);
-                                    return str
+                                    return teacherInfo.name
                                 } catch(err) {
                                     console.error(err)
+                                    return err.message
                                 }
                                 
                             }
@@ -147,9 +146,9 @@ async function resolveTeacherInfoArr() {
                         });
                         pool.push_front(...subTasks)
                       
-                        return 'ok'
+                        return universityId
                     } catch (error) {
-                        return 'err'
+                        return error.message
                     }
                   };
                 
@@ -230,7 +229,7 @@ function formatArticles(articlesText) {
 
 
 
-async function resolveTeacherInfo(suffix) {
+async function resolveTeacherInfo(suffix,universityId) {
     const prefix = 'https://www.x-mol.com'
 
     let url = prefix + suffix
@@ -259,6 +258,8 @@ async function resolveTeacherInfo(suffix) {
 
     Object.assign(teacherInfo,{
         name,
+        facultyId: suffix.split('/').reverse()[0],
+        universityId,
         researchField,
         articles
     })
