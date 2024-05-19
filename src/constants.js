@@ -7,12 +7,15 @@ const SOURCE_URL='https://www.x-mol.com/university/china';
 
 const DEPARTMENT_FILE_PATH = './save/.departments'
 const TEACHER_QUERY_SUFFIX_FILE_PATH = './save/.teachers'
+
+const SAVE_CONDITION_FILE_PATH = "./save/.lastSaved.json"
   
 
   export {
     DOUBLE_FIRST_CLASS_UNIVERSITY_LIST,
     SOURCE_URL,
     DEPARTMENT_FILE_PATH,
-    TEACHER_QUERY_SUFFIX_FILE_PATH
+    TEACHER_QUERY_SUFFIX_FILE_PATH,
+    SAVE_CONDITION_FILE_PATH
   };
   
